@@ -1,4 +1,4 @@
-from Mobs import *
+from Mob import *
 from weapon import *
 
 
@@ -14,12 +14,12 @@ class Player(pygame.sprite.Sprite):
         self.speedx = 0
         self.shield = 100
         self.shoot_delay = 250  # Задержка выстрелов
-        self.last_shot = pygame.time.get_ticks()
+        self.last_shot = pygame.time.get_ticks()  # Отслеживание времени последнего выстрела
         self.lives = 3
         self.hidden = False
         self.hide_timer = pygame.time.get_ticks()  # Время скрытия игрока
         self.power = 1
-        self.power_timer = pygame.time.get_ticks()  # Время усиления оружия
+        self.power_time = pygame.time.get_ticks()  # Время усиления оружия
         self.current_weapon = 'default'
 
     def update(self):
@@ -131,13 +131,13 @@ class Player(pygame.sprite.Sprite):
     def hide(self):
         self.hidden = True
         self.hide_timer = pygame.time.get_ticks()
-        self.rect.center = (WIDTH / 2, HEIGHT + 200)
+        self.rect.center = (WIDTH / 2, HEIGHT + 200)  # Скрытие игрока
 
 
 # Отображение текста, здоровья и щита
 def draw_text(surf, text, size, x, y):
     font = pygame.font.Font(font_name, size)
-    text_surface = font.render(text, True, WHITE)
+    text_surface = font.render(text, True, WHITE)  # Поверхность текста
     text_rect = text_surface.get_rect()
     text_rect.midtop = (x, y)
     surf.blit(text_surface, text_rect)
@@ -192,7 +192,7 @@ def main_menu(player):
             quit()
         else:
             if show_game_title:
-                screen.blit(title_background, (0, 0))
+                screen.blit(background, (0, 0))
                 draw_text(screen, "Asteroid rain", 75, WIDTH / 2, HEIGHT / 2 - 150)
                 draw_text(screen, "Press [SPACE] To Begin", 30, WIDTH / 2, HEIGHT / 2)
                 draw_text(screen, "Press [ESC] To Quit", 30, WIDTH / 2, (HEIGHT / 2) + 40)
@@ -234,46 +234,20 @@ class Pow(pygame.sprite.Sprite):
             self.kill() # Удаляем, если вышел за пределы экрана
 
 
-class Level:
-    def __init__(self, number, meteor_count, bonus_probability):
-        self.number = number
-        self.meteor_count = meteor_count
-        self.bonus_probability = bonus_probability
-
-# Определение уровней
-LEVELS = [
-    Level(number=1, meteor_count=3, bonus_probability=0),
-    Level(number=2, meteor_count=4, bonus_probability=0),
-    Level(number=3, meteor_count=5, bonus_probability=0),
-    Level(number=4, meteor_count=6, bonus_probability=0),
-    Level(number=5, meteor_count=7, bonus_probability=0),
-    Level(number=6, meteor_count=8, bonus_probability=0.2),
-    Level(number=7, meteor_count=9, bonus_probability=0.2),
-    Level(number=8, meteor_count=10, bonus_probability=0.2),
-    Level(number=9, meteor_count=12, bonus_probability=0.2),
-    Level(number=10, meteor_count=15, bonus_probability=0.2),
-]
-
-current_level = 0  # Текущий уровень
-
-
-def load_level(level):
-    for i in range(level.meteor_count):
-        if random.random() > level.bonus_probability:
-            mob_element = Mob()
-        else:
-            mob_element = ToughMob()
-        all_sprites.add(mob_element)
-        mobs.add(mob_element)
-
-
 def victory_screen():
     screen.fill(BLACK)
-    draw_text(screen, "VICTORY!", 60, WIDTH / 2, HEIGHT / 4)
-    draw_text(screen, "Score: {}".format(score), 36, WIDTH / 2, HEIGHT / 2)
-    draw_text(screen, "Press [SPACE] to play next level", 24, WIDTH / 2, HEIGHT * 3 / 4)
-    pygame.display.flip()
-    waiting_for_key(pygame.K_SPACE)
+    if current_level < 10:
+        draw_text(screen, "VICTORY!", 60, WIDTH / 2, HEIGHT / 4)
+        draw_text(screen, "Score: {}".format(score), 36, WIDTH / 2, HEIGHT / 2)
+        draw_text(screen, "Press [SPACE] to play next level", 24, WIDTH / 2, HEIGHT * 3 / 4)
+        pygame.display.flip()
+        waiting_for_key(pygame.K_SPACE)
+    else:
+        draw_text(screen, "VICTORY!", 60, WIDTH / 2, HEIGHT / 4)
+        draw_text(screen, "Score: {}".format(score), 36, WIDTH / 2, HEIGHT / 2)
+        draw_text(screen, "Congratulations! You've passed all the levels", 24, WIDTH / 2, HEIGHT * 3 / 4)
+        pygame.display.flip()
+        waiting_for_key(pygame.K_ESCAPE)
 
 
 def game_over_screen():
@@ -297,9 +271,7 @@ def waiting_for_key(key):
 
 
 def reset_game():
-    global LEVEL, METEOR_SPEED, score
-    LEVEL = 1
-    METEOR_SPEED = 5
+    global score
     score = 0
     player.lives = 3
     player.shield = 100
@@ -346,9 +318,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-            all_sprites.update()
-            powerups.update()
-            bombs.add(bomb)
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
@@ -363,25 +332,27 @@ while running:
         score += 50 - hit.radius
         random.choice(expl_sounds).play()
 
-        if is_strong_gun == True:
-            expl = ExplosionBomb(hit.rect.center, 'lg')
-        else:
-            expl = Explosion(hit.rect.center, 'lg')
+        expl = Explosion(hit.rect.center, 'lg')
         all_sprites.add(expl)
-        if random.random() > 0.9:
+
+        if random.random() > 0.9 and current_level > 1:
             pow = Pow(hit.rect.center)
-            all_sprites.add(pow)
-            powerups.add(pow)
+            if current_level > 1 and pow.type == 'gun':
+                all_sprites.add(pow)
+                powerups.add(pow)
+            if current_level > 3 and pow.type == 'shield':
+                all_sprites.add(pow)
+                powerups.add(pow)
+            if current_level > 5 and (pow.type == 'strong_gun' or pow.type == 'laser'):
+                all_sprites.add(pow)
+                powerups.add(pow)
         newmob()
 
     hits = pygame.sprite.spritecollide(player, mobs, True,
                                        pygame.sprite.collide_circle)
     for hit in hits:
         player.shield -= hit.radius * 2
-        if is_strong_gun == True:
-            expl = ExplosionBomb(hit.rect.center, 'sm')
-        else:
-            expl = Explosion(hit.rect.center, 'sm')
+        expl = Explosion(hit.rect.center, 'sm')
         all_sprites.add(expl)
         newmob()
         if player.shield <= 0:
@@ -408,20 +379,17 @@ while running:
     for bomb in bombs:
         meteor_hit_list = pygame.sprite.spritecollide(bomb, meteors, True)
         for meteor in meteor_hit_list:
-            # Применить эффект взрыва
-            explosion = ExplosionBomb(meteor.rect.center, 'lg')
+            explosion = Explosion(meteor.rect.center, 'lg')
             all_sprites.add(explosion)
             meteor.kill()
 
     # Проверка, если игрок набрал достаточно очков для победы
     if score >= VICTORY_SCORE:
         current_level += 1
-        if current_level < len(LEVELS):
-            level = LEVELS[current_level]
-            load_level(level)
+        if current_level < 10:
             new_level = True  # Обозначаем начало нового уровня
+            VICTORY_SCORE += 300
         else:
-            # Игрок прошел все уровни
             victory_screen()
             reset_game()
             new_level = False  # Сброс флага нового уровня
@@ -434,25 +402,16 @@ while running:
         game_over_screen()
         reset_game()
 
-    if player.lives == 0 and not death_explosion.alive():
-        running = False
-
-    # Проверка, если игрок убил все метеоры, переход на следующий уровень
-    # if score >= 100 and not new_level:
-    #     current_level += 1
-    #     if current_level < len(LEVELS):
-    #         level = LEVELS[current_level]
-    #         load_level(level)
-    #         new_level = True  # Обозначаем начало нового уровня
-    #     else:
-    #         # Игрок прошел все уровни
-    #         victory_screen()
-    #         reset_game()
-    #         new_level = False  # Сброс флага нового уровня
-
     if new_level:
         screen.fill(BLACK)
-        draw_text(screen, f"Level {current_level + 1}", 36, WIDTH / 2, HEIGHT / 2)
+        draw_text(screen, f"Level {current_level}", 36, WIDTH / 2, HEIGHT / 2)
+        draw_text(screen, f"Next level: {VICTORY_SCORE}", 60, WIDTH / 2, HEIGHT / 4)
+        if current_level == 2:
+            draw_text(screen, f"New bonus: Lightning", 36, WIDTH / 2, HEIGHT * 3 / 4)
+        if current_level == 4:
+            draw_text(screen, f"New bonus: Shield", 36, WIDTH / 2, HEIGHT * 3 / 4)
+        if current_level == 6:
+            draw_text(screen, f"New weapon: Bombs", 36, WIDTH / 2, HEIGHT * 3 / 4)
         pygame.display.flip()
         pygame.time.wait(2000)  # Пауза перед началом нового уровня
         new_level = False
@@ -464,10 +423,9 @@ while running:
     draw_text(screen, str(score), 18, WIDTH / 2, 10)
     draw_shield_bar(screen, 5, 5, player.shield)
 
-
     draw_lives(screen, WIDTH - 100, 5, player.lives, player_mini_img)
-    draw_text(screen, f"Level: {current_level + 1}", 18, WIDTH / 2, 30)
+    draw_text(screen, f"Level: {current_level}", 18, WIDTH / 2, 30)
 
     pygame.display.flip()
-# load_level(LEVELS[current_level])
+
 pygame.quit()

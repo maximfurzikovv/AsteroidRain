@@ -12,8 +12,8 @@ class Bomb(pygame.sprite.Sprite):
         self.speedy = -10  # Бомба двигается вверх
 
     def update(self):
-        self.rect.y += self.speedy
-        if self.rect.bottom < 0:
+        self.rect.y += self.speedy  # Движение
+        if self.rect.bottom < 0:  # Нижняя граница находится за границей экрана
             self.kill()
 
 
@@ -56,9 +56,9 @@ class Explosion(pygame.sprite.Sprite):
         self.image = explosion_anim[self.size][0]
         self.rect = self.image.get_rect()
         self.rect.center = center
-        self.frame = 0
-        self.last_update = pygame.time.get_ticks()
-        self.frame_rate = 75
+        self.frame = 0  # Текущий кадр
+        self.last_update = pygame.time.get_ticks()  # Отслеживание времени последнего обновления
+        self.frame_rate = 75  # Частота кадров
 
     def update(self):
         now = pygame.time.get_ticks()
@@ -71,29 +71,4 @@ class Explosion(pygame.sprite.Sprite):
                 center = self.rect.center
                 self.image = explosion_anim[self.size][self.frame]
                 self.rect = self.image.get_rect()
-                self.rect.center = center
-
-
-class ExplosionBomb(pygame.sprite.Sprite):
-    def __init__(self, center, size):
-        pygame.sprite.Sprite.__init__(self)
-        self.size = size
-        self.image = explosion_anim[self.size][0]
-        self.rect = self.image.get_rect()
-        self.rect.center = center
-        self.frame = 0
-        self.last_update = pygame.time.get_ticks()
-        self.frame_rate = 100
-
-    def update(self):
-        now = pygame.time.get_ticks()
-        if now - self.last_update > self.frame_rate:
-            self.last_update = now
-            self.frame += 1
-            if self.frame == len(explosion_anim[self.size]):
-                self.kill()
-            else:
-                center = self.rect.center
-                self.image = explosion_anim[self.size][self.frame]
-                self.rect = self.image.get_rect()
-                self.rect.center = center
+                self.rect.center = center  # Сохранение центра

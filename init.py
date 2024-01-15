@@ -24,13 +24,13 @@ is_strong_gun = False
 # Инициализация pygame и создание окна
 pygame.init()
 pygame.mixer.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((WIDTH, HEIGHT))  # Создание окна
 pygame.display.set_caption("Asteroid Rain")
 clock = pygame.time.Clock()   # Синхронизация FPS
 
 font_name = pygame.font.match_font('arial')
 
-VICTORY_SCORE = 10000000
+VICTORY_SCORE = 1000
 
 player_skins = [
     'playerShip1_gray.png',
@@ -45,12 +45,6 @@ player_mini_img.set_colorkey(BLACK)  # Черный цвет становитс�
 # Загрузка текстур
 background = pygame.image.load(path.join(img_dir, 'starfield.png')).convert()
 background_rect = background.get_rect()
-title_background = pygame.image.load(path.join(img_dir, "main.png")).convert()
-title_background = pygame.transform.scale(title_background, (WIDTH, HEIGHT), screen)
-title_background_rect = background.get_rect()
-#player_img = pygame.image.load(path.join(img_dir, 'playerShip1_gray.png')).convert()
-#player_mini_img = pygame.transform.scale(player_img, (25, 19))
-#player_mini_img.set_colorkey(BLACK)
 bullet_img = pygame.image.load(path.join(img_dir, 'laserRed16.png')).convert()
 missile_img = pygame.image.load(path.join(img_dir, 'missile.png')).convert()
 meteor_images = []
@@ -108,10 +102,10 @@ expl_sounds = []
 for sound in ['expl3.wav', 'expl6.wav']:
     expl_sounds.append(pygame.mixer.Sound(path.join(sound_folder, sound)))
 
-pygame.mixer.music.set_volume(0.7)
+pygame.mixer.music.set_volume(0.7)  # Устанавливаем громкость
 player_die_sound = pygame.mixer.Sound(path.join(sound_folder, 'rumble1.ogg'))
 
-# Группы спрайтов
+# Группы спрайтов (контейнеры графических объектов)
 all_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
 powerups = pygame.sprite.Group()
