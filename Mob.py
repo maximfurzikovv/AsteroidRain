@@ -1,6 +1,7 @@
 import random
 from init import *
 
+current_level = 1  # Текущий уровень
 
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
@@ -14,7 +15,7 @@ class Mob(pygame.sprite.Sprite):
         # Случайное начальное положение и скорость
         self.rect.x = random.randrange(0, WIDTH - self.rect.width)
         self.rect.y = random.randrange(-150, -100)
-        self.speedy = random.randrange(8, 20)
+        self.speedy = random.randrange(8 + current_level, 12 + current_level)
         #self.health = 2
         self.speedx = random.randrange(-5, 5)
 
@@ -55,7 +56,7 @@ class ToughMob(pygame.sprite.Sprite):
         self.radius = int(self.rect.width * .90 / 2)
         self.rect.x = random.randrange(0, WIDTH - self.rect.width)
         self.rect.y = random.randrange(-150, -100)
-        self.speedy = random.randrange(5, 20)
+        self.speedy = random.randrange(5 + current_level, 15 + current_level)
         self.speedx = random.randrange(-3, 3)
         self.rotation = 0
         self.rotation_speed = random.randrange(-8, 8)
@@ -81,9 +82,3 @@ class ToughMob(pygame.sprite.Sprite):
             self.rect.x = random.randrange(0, WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -40)
             self.speedy = random.randrange(1, 8)
-
-        # hits = pygame.sprite.spritecollide(self, bullets, True)
-        # for hit in hits:
-        #     self.health -= 1
-        #     if self.health <= 0:
-        #         self.kill()
